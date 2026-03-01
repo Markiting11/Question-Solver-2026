@@ -1,0 +1,8 @@
+{
+  "name": "Student Question Solver",
+  "description": "An AI-powered study companion that explains answers in multiple formats including visual diagrams, step-by-step guides, and simplified summaries.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}

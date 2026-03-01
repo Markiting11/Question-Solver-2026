@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anwar Ali Sehar - Student Question Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Patrick+Hand&family=Architects+Daughter&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+        min-height: 100vh;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      .font-handwriting {
+        font-family: 'Patrick Hand', cursive;
+      }
+      
+      .font-easy-notes {
+        font-family: 'Architects Daughter', cursive;
+      }
+      
+      /* --- REALISTIC SPIRAL NOTEBOOK CSS (Study Notes) --- */
+      .spiral-notebook {
+        position: relative;
+        background-color: #fff;
+        width: 100%;
+        min-height: 600px;
+        border-radius: 4px 16px 16px 4px;
+        box-shadow: 
+          10px 10px 20px rgba(0,0,0,0.15),
+          1px 1px 0 rgba(0,0,0,0.05);
+        
+        /* The Paper Lines */
+        background-image: 
+          /* Red Margin Line */
+          linear-gradient(90deg, transparent 79px, #ef4444 79px, #ef4444 81px, transparent 81px),
+          /* Blue Horizontal Lines - 40px height */
+          linear-gradient(#e5e7eb 1px, transparent 1px);
+        background-size: 100% 100%, 100% 40px;
+        background-position: 0 0, 0 30px; /* Offset to align text */
+        
+        padding: 40px 40px 40px 100px; /* Left padding creates space for margin and spiral */
+      }
+
+      /* The Spiral Binding Container */
+      .spiral-binding {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 60px;
+        background: rgba(0,0,0,0.02);
+        border-right: 1px solid rgba(0,0,0,0.05);
+        border-radius: 4px 0 0 4px;
+        overflow: hidden;
+      }
+
+      /* The Holes */
+      .spiral-binding::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 28px; /* Align with first line */
+        width: 12px;
+        height: 100%;
+        background: radial-gradient(circle, #334155 40%, transparent 45%);
+        background-size: 100% 40px; /* Matches line height */
+        background-position: 0 0;
+      }
+
+      /* The Wire Coils */
+      .spiral-binding::after {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 20px;
+        width: 50px;
+        height: 100%;
+        background: repeating-linear-gradient(
+          15deg,
+          transparent,
+          transparent 8px,
+          #374151 8px,
+          #111827 11px, 
+          #6b7280 12px,
+          transparent 14px,
+          transparent 40px
+        );
+        filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.2));
+      }
+
+      /* --- EASY NOTES PAPER CSS --- */
+      .easy-notes-paper {
+        background-color: #fefce8; /* Light yellow tint like legal pad */
+        background-image: linear-gradient(#e7e5e4 1px, transparent 1px);
+        background-size: 100% 32px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        position: relative;
+        padding: 2rem;
+      }
+      
+      .easy-notes-paper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 2rem;
+        width: 2px;
+        background-color: #fca5a5; /* Red margin */
+      }
+
+      /* Ink text effect */
+      .ink-text {
+        opacity: 0.95;
+      }
+
+      @keyframes ink-write {
+        from { 
+          opacity: 0; 
+          transform: translateY(10px) skewX(-2deg); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0) skewX(0); 
+        }
+      }
+
+      .animate-ink > * {
+        animation: ink-write 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        opacity: 0; 
+      }
+      
+      .animate-ink > *:nth-child(1) { animation-delay: 0.1s; }
+      .animate-ink > *:nth-child(2) { animation-delay: 0.2s; }
+      .animate-ink > *:nth-child(3) { animation-delay: 0.3s; }
+      .animate-ink > *:nth-child(n+4) { animation-delay: 0.4s; }
+
+      .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+      }
+      
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes gradient-x {
+        0%, 100% { background-position: left center; }
+        50% { background-position: right center; }
+      }
+      .animate-gradient-x {
+        animation: gradient-x 8s ease infinite;
+        background-size: 200% 200%;
+      }
+      
+      /* Blob Animations */
+      @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+      }
+      .animate-blob {
+        animation: blob 7s infinite;
+      }
+      .animation-delay-2000 {
+        animation-delay: 2s;
+      }
+      .animation-delay-4000 {
+        animation-delay: 4s;
+      }
+
+      /* PDF & Print Specific Optimization */
+      @media print {
+        body { background: white !important; color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        header, .input-section-container, .sidebar, .print-hidden, .no-print { display: none !important; }
+        .spiral-notebook, .easy-notes-paper {
+          box-shadow: none !important;
+          border: 1px solid #e2e8f0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+        }
+        h1, h2, h3 { page-break-after: avoid !important; page-break-inside: avoid !important; }
+        blockquote, pre, .visual-content-area { page-break-inside: avoid !important; }
+        li { page-break-inside: avoid !important; }
+      }
+      
+      /* Specific class for html2pdf to avoid breaking elements */
+      .html2pdf__page-break {
+        display: block;
+        height: 0;
+        page-break-before: always;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="text-slate-900 antialiased selection:bg-emerald-100 selection:text-emerald-800">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
