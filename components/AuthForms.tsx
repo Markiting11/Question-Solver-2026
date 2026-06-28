@@ -181,12 +181,6 @@ export const AuthForms: React.FC<AuthFormsProps> = ({ onLoginSuccess, adminCreds
     }
   };
 
-  const autofillAdmin = () => {
-    setEmail('arshad2097@gmail.com');
-    setPassword('anwar786');
-    setMode('login');
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 relative overflow-hidden">
       {/* Background decoration */}
@@ -203,30 +197,6 @@ export const AuthForms: React.FC<AuthFormsProps> = ({ onLoginSuccess, adminCreds
             </div>
             <h2 className="text-2xl font-bold text-slate-900">Anwar Ali Sehar</h2>
             <p className="text-slate-500 text-sm mt-1">Secured Question Solver Platform</p>
-          </div>
-
-          {/* Quick Admin Access */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-xs text-indigo-950 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center font-bold text-indigo-900 gap-1.5">
-                <Sparkles size={14} className="text-indigo-600" />
-                <span>Admin Quick Access</span>
-              </span>
-              <button 
-                type="button"
-                onClick={autofillAdmin}
-                className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-all text-[10px]"
-              >
-                Autofill Admin
-              </button>
-            </div>
-            <p className="leading-relaxed">
-              Log in with Admin credentials or click the button above to autofill:
-            </p>
-            <div className="font-mono text-[11px] bg-indigo-100/50 p-2 rounded-lg text-indigo-900 flex justify-between">
-              <span>Email: arshad2097@gmail.com</span>
-              <span>Pass: anwar786</span>
-            </div>
           </div>
 
           {error && (
