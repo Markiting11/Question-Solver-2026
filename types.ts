@@ -45,6 +45,7 @@ export type UserStatus = 'pending' | 'approved' | 'rejected';
 export type UserRole = 'admin' | 'user';
 
 export interface User {
+  uid?: string;
   email: string;
   password?: string;
   name: string;

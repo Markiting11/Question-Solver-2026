@@ -1,38 +1,69 @@
-
 import React, { useState, useEffect } from 'react';
 import { User, UserStatus } from '../types';
-import { Check, X, Trash2, UserPlus, Shield, UserX, ToggleLeft as ToggleOff, ToggleRight as ToggleOn } from 'lucide-react';
+import { Check, Trash2, UserX, ToggleLeft as ToggleOff, ToggleRight as ToggleOn } from 'lucide-react';
+import { 
+  subscribeToUsers, 
+  updateUserStatusInDb, 
+  deleteUserFromDb,
+  fetchPlatformConfig,
+  updatePlatformConfig
+} from '../services/firebase';
 
 export const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [config, setConfig] = useState({ allowSignup: true });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedUsers = localStorage.getItem('sqs_users');
-    const savedConfig = localStorage.getItem('sqs_config');
-    if (savedUsers) setUsers(JSON.parse(savedUsers));
-    if (savedConfig) setConfig(JSON.parse(savedConfig));
+    // Subscribe to users real-time
+    const unsubscribe = subscribeToUsers(
+      (updatedUsers) => {
+        setUsers(updatedUsers);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error subscribing to users:", err);
+        setError("Missing or insufficient permissions. Please check that you are logged in as Arshad2097@gmail.com.");
+        setLoading(false);
+      }
+    );
+
+    // Fetch config
+    fetchPlatformConfig()
+      .then(cfg => setConfig(cfg))
+      .catch(err => console.error("Error fetching config:", err));
+
+    return () => unsubscribe();
   }, []);
 
-  const saveUsers = (updatedUsers: User[]) => {
-    setUsers(updatedUsers);
-    localStorage.setItem('sqs_users', JSON.stringify(updatedUsers));
+  const toggleSignup = async () => {
+    try {
+      const newValue = !config.allowSignup;
+      setConfig({ allowSignup: newValue });
+      await updatePlatformConfig(newValue);
+    } catch (err) {
+      console.error("Error updating config:", err);
+    }
   };
 
-  const toggleSignup = () => {
-    const newConfig = { ...config, allowSignup: !config.allowSignup };
-    setConfig(newConfig);
-    localStorage.setItem('sqs_config', JSON.stringify(newConfig));
+  const updateUserStatus = async (user: User, status: UserStatus) => {
+    if (!user.uid) return;
+    try {
+      await updateUserStatusInDb(user.uid, status);
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
   };
 
-  const updateUserStatus = (email: string, status: UserStatus) => {
-    const updated = users.map(u => u.email === email ? { ...u, status } : u);
-    saveUsers(updated);
-  };
-
-  const deleteUser = (email: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      saveUsers(users.filter(u => u.email !== email));
+  const deleteUser = async (user: User) => {
+    if (!user.uid) return;
+    if (window.confirm(`Are you sure you want to delete ${user.name}?`)) {
+      try {
+        await deleteUserFromDb(user.uid);
+      } catch (err) {
+        console.error("Error deleting user:", err);
+      }
     }
   };
 
@@ -44,12 +75,27 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <p className="mt-4 text-slate-500 font-medium">Loading user list...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in-up space-y-8 max-w-5xl mx-auto">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-sm font-medium">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Admin Dashboard</h2>
-          <p className="text-slate-500">Manage user approvals and platform settings.</p>
+          <p className="text-slate-500">Manage user approvals and platform settings securely via Firestore.</p>
         </div>
         
         <div className="flex items-center space-x-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
@@ -78,11 +124,11 @@ export const AdminPanel: React.FC = () => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.email} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={user.uid || user.email} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold mr-3">
-                          {user.name.charAt(0)}
+                          {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="font-bold text-slate-800">{user.name}</div>
@@ -102,7 +148,7 @@ export const AdminPanel: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         {user.status !== 'approved' && (
                           <button 
-                            onClick={() => updateUserStatus(user.email, 'approved')}
+                            onClick={() => updateUserStatus(user, 'approved')}
                             className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
                             title="Approve"
                           >
@@ -111,7 +157,7 @@ export const AdminPanel: React.FC = () => {
                         )}
                         {user.status !== 'rejected' && (
                           <button 
-                            onClick={() => updateUserStatus(user.email, 'rejected')}
+                            onClick={() => updateUserStatus(user, 'rejected')}
                             className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors"
                             title="Reject"
                           >
@@ -119,7 +165,7 @@ export const AdminPanel: React.FC = () => {
                           </button>
                         )}
                         <button 
-                          onClick={() => deleteUser(user.email)}
+                          onClick={() => deleteUser(user)}
                           className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
                           title="Delete"
                         >

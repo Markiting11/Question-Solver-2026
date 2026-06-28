@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about a user's role and approval status",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["email", "name", "role", "status", "createdAt"]
+    },
+    "Config": {
+      "title": "Platform Config",
+      "description": "Global configurations for the platform",
+      "type": "object",
+      "properties": {
+        "allowSignup": { "type": "boolean" }
+      },
+      "required": ["allowSignup"]
+    },
+    "HistoryItem": {
+      "title": "History Item",
+      "description": "A solved question history item with solutions",
+      "type": "object",
+      "properties": {
+        "question": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "solution": { "type": "object" }
+      },
+      "required": ["question", "timestamp", "solution"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/users/{userId}/history/{historyId}": {
+      "schema": { "$ref": "#/entities/HistoryItem" },
+      "description": "User solved question histories"
+    },
+    "/config/settings": {
+      "schema": { "$ref": "#/entities/Config" },
+      "description": "Global settings document"
+    }
+  }
+}

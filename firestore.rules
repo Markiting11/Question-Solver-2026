@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net - default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      
+      allow create: if isSignedIn() && isOwner(userId) &&
+        request.resource.data.keys().hasAll(['email', 'name', 'role', 'status', 'createdAt']) &&
+        request.resource.data.keys().size() == 5 &&
+        request.resource.data.email is string &&
+        request.resource.data.name is string &&
+        request.resource.data.role is string &&
+        request.resource.data.status is string &&
+        request.resource.data.createdAt is int &&
+        // Secure self-privilege escalation check
+        (request.resource.data.role == 'user' || request.resource.data.email.toLower() == 'arshad2097@gmail.com') &&
+        (request.resource.data.status == 'pending' || request.resource.data.email.toLower() == 'arshad2097@gmail.com');
+        
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (isOwner(userId) && 
+         request.resource.data.email == resource.data.email &&
+         request.resource.data.role == resource.data.role &&
+         request.resource.data.status == resource.data.status &&
+         request.resource.data.createdAt == resource.data.createdAt &&
+         request.resource.data.name is string)
+      );
+      
+      allow delete: if isAdmin();
+
+      match /history/{historyId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    match /config/settings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
