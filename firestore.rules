@@ -15,14 +15,9 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-
     function isAdmin() {
       return isSignedIn() && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        getUserData().role == 'admin';
+        request.auth.token.get('email', '').lower() == 'arshad2097@gmail.com';
     }
 
     match /users/{userId} {
@@ -38,8 +33,8 @@ service cloud.firestore {
         request.resource.data.status is string &&
         request.resource.data.createdAt is int &&
         // Secure self-privilege escalation check
-        (request.resource.data.role == 'user' || request.resource.data.email.toLower() == 'arshad2097@gmail.com') &&
-        (request.resource.data.status == 'pending' || request.resource.data.email.toLower() == 'arshad2097@gmail.com');
+        (request.resource.data.role == 'user' || request.resource.data.email.lower() == 'arshad2097@gmail.com') &&
+        (request.resource.data.status == 'pending' || request.resource.data.email.lower() == 'arshad2097@gmail.com');
         
       allow update: if isSignedIn() && (
         isAdmin() || 

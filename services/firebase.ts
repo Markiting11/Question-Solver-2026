@@ -211,19 +211,16 @@ export const deleteUserFromDb = async (userId: string): Promise<void> => {
 // Global config helpers
 export const fetchPlatformConfig = async (): Promise<{ allowSignup: boolean }> => {
   const configRef = doc(db, 'config', 'settings');
-  const path = 'config/settings';
   try {
     const snap = await getDoc(configRef);
     if (snap.exists()) {
       return snap.data() as { allowSignup: boolean };
     } else {
-      const defaultConfig = { allowSignup: true };
-      await setDoc(configRef, defaultConfig);
-      return defaultConfig;
+      return { allowSignup: true };
     }
   } catch (error) {
-    handleFirestoreError(error, OperationType.GET, path);
-    throw error;
+    console.warn("Could not fetch platform config, defaulting to allowSignup: true", error);
+    return { allowSignup: true };
   }
 };
 

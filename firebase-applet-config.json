@@ -1,10 +1,10 @@
 {
-  "projectId": "capable-decorator-f1wkv",
-  "appId": "1:452333860289:web:612041dcfe84f7e5b02b40",
-  "apiKey": "AIzaSyBtfXaeeaBqFQZAguvpln_Y0r7u8wypCfc",
-  "authDomain": "capable-decorator-f1wkv.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-studentquestions-ac4f3ef3-df93-461b-b2dd-9cb14171584c",
-  "storageBucket": "capable-decorator-f1wkv.firebasestorage.app",
-  "messagingSenderId": "452333860289",
+  "projectId": "question-solver-app-d7edb",
+  "appId": "1:546950151414:web:43909840ec8b644b5680d7",
+  "apiKey": "AIzaSyAb39pVZJJ-1_ZC7AUT17kyUpLoF-r4PfU",
+  "authDomain": "question-solver-app-d7edb.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "question-solver-app-d7edb.firebasestorage.app",
+  "messagingSenderId": "546950151414",
   "measurementId": ""
 }
